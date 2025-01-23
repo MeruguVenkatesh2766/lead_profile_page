@@ -1,80 +1,53 @@
-import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, Text, Button } from 'react-native';
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack'; // Native stack import
+import { Ionicons } from '@expo/vector-icons';
 
-export default function App() {
-  const snapPoints = useMemo(() => ['25%', '50%', '70%'], []);
-  const bottomSheetRef = useRef(null);
-  const [isOpen, setIsOpen] = useState(false);
+import { LeadProfile } from './src/LeadProfile';
+import { TasksScreen } from './src/TasksScreen'; // Tasks Screen
+import { HomeScreen } from './src/HomeScreen'; // Contacts Placeholder
+import { NewTask } from './src/NewTask'; // Import NewTask component
 
-  const handleClosePress = () => {
-    setIsOpen(false);
-    bottomSheetRef.current?.close();
-  };
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator(); // Use native stack
 
-  const handleOpenPress = () => {
-    setIsOpen(true);
-    bottomSheetRef.current?.snapToIndex(0);
-  };
 
-  const handleCollapsePress = () => bottomSheetRef.current?.snapToIndex(0);
-  const snapToIndex = (index) => bottomSheetRef.current?.snapToIndex(index);
-
-  const renderBackdrop = useCallback(
-    (props) => (
-      <BottomSheetBackdrop
-        {...props}
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-      />
-    ),
-    []
-  );
-
+function TasksStack() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <Button title="Open" onPress={handleOpenPress} />
-        <Button title="Close" onPress={handleClosePress} />
-        <Button title="Collapse" onPress={handleCollapsePress} />
-        <Button title="Snap To 25%" onPress={() => snapToIndex(0)} />
-        <Button title="Snap To 50%" onPress={() => snapToIndex(1)} />
-        <Button title="Snap To 70%" onPress={() => snapToIndex(2)} />
-
-        <BottomSheet
-          ref={bottomSheetRef}
-          index={-1}
-          snapPoints={snapPoints}
-          enablePanDownToClose={true}
-          handleIndicatorStyle={{ backgroundColor: '#fff' }}
-          backgroundStyle={{ backgroundColor: '#1d0f4e' }}
-          backdropComponent={renderBackdrop}
-          onClose={() => setIsOpen(false)}
-        >
-          <View style={styles.contentContainer}>
-            <Text style={styles.containerHeadline}>Awesome Bottom Sheet 🎉</Text>
-            <Button title="Close" onPress={handleClosePress} />
-          </View>
-        </BottomSheet>
-      </View>
-    </GestureHandlerRootView>
+    <Stack.Navigator initialRouteName="TasksScreen">
+      <Stack.Screen name="TasksScreen" component={TasksScreen} />
+      <Stack.Screen name="NewTask" component={NewTask} />
+    </Stack.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-  },
-  contentContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  containerHeadline: {
-    fontSize: 24,
-    fontWeight: '600',
-    padding: 20,
-    color: '#fff',
-  }
-});
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+            if (route.name === 'Home') {
+              iconName = focused ? 'home' : 'home-outline';
+            } else if (route.name === 'Contacts') {
+              iconName = focused ? 'people' : 'people-outline';
+            } else if (route.name === 'Tasks') {
+              iconName = focused ? 'list' : 'list-outline';
+            }
+
+            // Return the appropriate icon
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: '#5B9BD5',
+          tabBarInactiveTintColor: 'gray',
+        })}
+      >
+        <Tab.Screen options={{ headerShown: false }} name="Home" component={HomeScreen} />
+        <Tab.Screen options={{ headerShown: false }} name="Contacts" component={LeadProfile} />
+        <Tab.Screen options={{ headerShown: false }} name="Tasks" component={TasksStack} />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}

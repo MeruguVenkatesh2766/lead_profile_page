@@ -1,20 +1,15 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { NewTask } from './NewTask';
-import BottomSheet from '@gorhom/bottom-sheet';
-export const ActivityTab = () => {
+export const ActivityTab = ({ handleBottomSheet }) => {
     const navigation = useNavigation(); // Access navigation prop
-    const [showBM, setShowBM] = useState(false);
-    const handleShowBM = () => {
-        setShowBM(true);
-    }
-    // Reference to the bottom sheet
-    const bottomSheetRef = useRef(null);
 
-    // Define snap points
-    const snapPoints = useMemo(() => ['25%', '50%', '90%'], []);
+    useEffect(() => {
+        navigation.setOptions({
+            handleBottomSheet, // Set the function as an option (not a param)
+        });
+    }, [navigation, handleBottomSheet]);
 
     return (
         <View style={styles.container}>
@@ -32,7 +27,7 @@ export const ActivityTab = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.actionButton}
-                    onPress={handleShowBM}
+                    onPress={handleBottomSheet}
                 // Navigate to NewTask
                 >
                     <Ionicons name="calendar-outline" size={24} color="#5B9BD5" />
@@ -67,15 +62,8 @@ export const ActivityTab = () => {
                     <Text style={styles.taskDescription}>Follow-up ReFar on Test Raising</Text>
                 </View>
             </View>
-            <BottomSheet
-                ref={bottomSheetRef}
-                snapPoints={snapPoints}
-                enablePanDownToClose={true}
-            // onClose={onClose} // Callback when the bottom sheet is dismissed
-            >
-                <NewTask />
-            </BottomSheet>
         </View>
+
     );
 };
 
